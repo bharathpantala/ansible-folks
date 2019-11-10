@@ -1,0 +1,34 @@
+---
+- hosts: db
+  become: true
+  tasks:
+   - name: Install Nginx Webserver
+     yum: pkg={{ item }} state=present update_cache=yes
+     with_items:
+       - nginx
+       - vim
+       - wget
+       - tree
+     notify:
+        - Start webserver     
+
+   - name: Copy the webpages
+     copy: src=index.html dest=/usr/share/nginx/html mode=0644
+     notify:
+       - Restart the Websevr
+ 
+   - name: Copy the aboutus
+     copy: src=about.html dest=/usr/share/nginx/html mode=0644
+     notify:
+       - Restart the Websevr
+
+
+  handlers:
+   - name: Restart the Websevr
+     service: name=nginx state=restarted
+
+
+   - name: Start webserver
+     service: name=nginx state=started enabled=yes
+
+

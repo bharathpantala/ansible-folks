@@ -1,0 +1,63 @@
+---
+- hosts: app
+  become: true
+  vars:
+    doc_root: "/var/www/html/"
+    web_project: "sample/"
+    pkg_debian: "apache2"
+    pkg_redhat: "httpd"
+    redhat_apache_daemon: "httpd"
+    debian_apache_daemon: "apache2"
+  tasks:
+     - name: "Installing Apache Web Server"
+       yum: name={{ pkg_redhat }} state=present update_cache=yes
+       notify:
+         - start-httpd
+       tags:
+         - never
+         - redhat-install
+         - redhat-install-all
+
+     - name: "Installing Apache Web Server"
+       apt: name={{ pkg_debian }} state=present update_cache=yes
+       notify:
+         - start-apache
+       tags:
+         - never
+         - debian-install
+         - debian-install-all
+
+     - name: "Copy the Web page"
+       copy: src={{ web_project }} dest={{ doc_root }} mode=0644
+       notify:
+         - restart-httpd
+       tags:
+         - never
+         - redhat-deploy
+         - redhat-install-all
+
+     - name: "Copy the Web page"
+       copy: 
+         src: "{{ web_project }}"
+         dest: "{{ doc_root }}"
+         mode: 0644
+       notify:
+         - restart-apache
+       tags:
+         - never
+         - debian-deploy
+         - debian-install-all
+
+  handlers:
+      - name: start-httpd
+        service: name={{ redhat_apache_daemon }} state=started enabled=yes
+      
+      - name: start-apache
+        service: name={{ debian_apache_daemon }} state=started enabled=yes
+
+      - name: restart-httpd
+        service: name={{ redhat_apache_daemon }} state=restarted
+
+      - name: restart-apache
+        service: name={{ debian_apache_daemon }} state=restarted
+

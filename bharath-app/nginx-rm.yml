@@ -1,0 +1,17 @@
+---
+- hosts: web
+  become: true
+  tasks:
+   - name: Stop the nginx
+     service: name=nginx state=stopped
+
+   - name: Uninstall nginx
+     yum: pkg=nginx state=absent
+
+   - name: Removing web pages and conf
+     file: dest={{ item }} state=absent
+     with_items:
+       - /usr/share/nginx/html
+       - /etc/nginx
+
+ 

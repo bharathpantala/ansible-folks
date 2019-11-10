@@ -1,0 +1,9 @@
+---
+- hosts: web
+  become: true
+  tasks: 
+   - name: replace the old index with new
+     copy: src=index.html dest=/usr/share/nginx/html 
+
+   - name: reload
+     service: name=nginx state=reloaded 
